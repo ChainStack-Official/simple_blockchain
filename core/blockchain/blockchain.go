@@ -4,6 +4,7 @@ import (
 	"simple_blockchain/core/block"
 	"simple_blockchain/core/bcerr"
 	"sync"
+	"time"
 )
 
 // 区块链
@@ -14,6 +15,18 @@ type Blockchain struct {
 	lock sync.RWMutex
 	//
 	//BcErrChan chan error
+}
+
+func NewBlockchain() *Blockchain {
+	genesis := block.Block{
+		Index: 1,
+		Timestamp: string(time.Now().Unix()),
+		Msg: "我是创世块",
+	}
+	genesis.Hash = genesis.HashForThisBlock()
+	return &Blockchain{
+		blocks: []block.Block{ genesis },
+	}
 }
 
 func (bc *Blockchain) GetBlocks() []block.Block {
