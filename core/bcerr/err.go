@@ -7,6 +7,7 @@ import (
 )
 
 var errLang = ""
+// TODO:generator
 const(
 	// 新增block的错误
 	NewBlockIndexWrongErr = iota
