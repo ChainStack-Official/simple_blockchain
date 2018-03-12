@@ -20,7 +20,7 @@ type Blockchain struct {
 func NewBlockchain() *Blockchain {
 	genesis := block.Block{
 		Index: 1,
-		Timestamp: string(time.Now().Unix()),
+		Timestamp: time.Now().Unix(),
 		Msg: "我是创世块",
 	}
 	genesis.Hash = genesis.HashForThisBlock()
