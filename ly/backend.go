@@ -17,12 +17,28 @@ var miners []*miner.Miner
 
 func init() {
 	Bc = blockchain.NewBlockchain()
+	// 监听新区块创建的事件，TODO：换成事件通知后这里就不需要做中转了
+	go func() {
+		for {
+			select {
+			case newBlockIndex := <-Bc.NewBlockCommittedChan:
+				for _, m := range miners {
+					m.NewBlockFoundChan <- newBlockIndex
+				}
+			}
+		}
+	}()
 }
+
+// 最多多少个矿工
+const maxMinerCount = 4
 
 // 启动挖矿
 func StartMine(minerCount int) error {
 	if minerCount <= 0 {
 		return errors.New("矿工个数必须大于0")
+	} else if minerCount > maxMinerCount {
+		return fmt.Errorf("矿工个数不能大于%v个", maxMinerCount)
 	}
 	mineLock.Lock()
 	defer mineLock.Unlock()
@@ -34,6 +50,7 @@ func StartMine(minerCount int) error {
 	for i := 0; i < minerCount; i++ {
 		m := miner.NewMiner(i, Bc)
 		miners = append(miners, m)
+		// TODO：这里要加一个WaitGroup
 		go func() {
 			m.Run()
 		}()

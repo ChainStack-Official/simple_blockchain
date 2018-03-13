@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"errors"
+	"simple_blockchain/common/hash_util"
 	"simple_blockchain/core/bcerr"
 	"simple_blockchain/core/block"
 	"sync"
@@ -14,13 +15,52 @@ import (
 type Blockchain struct {
 	// 当前链上的所有块
 	blocks []block.Block
+	// 新的未处理的区块池（在挖矿赶不上新的交易产生时，就需要将未处理的交易放这里）
+	// TODO：block本身还需要一个机制来保证矿工不会修改其信息（私钥签名在这起的作用）。如果不同矿工使用了同一个PrevHash对几个不同的合法交易记账，则可能导致分叉
+	newBlocksPool []block.Block
 	// TODO：全网的难度是怎么达成共识的？
 	curDifficulty int
 
-	lock   sync.RWMutex
-	dfLock sync.Mutex
-	//
-	//BcErrChan chan error
+	lock              sync.RWMutex
+	dfLock            sync.Mutex
+	newBlocksPoolLock sync.Mutex
+
+	// 用于发出新的区块提交的通知
+	NewBlockCommittedChan chan int
+}
+
+// 添加新的交易到待记录的池子中
+func (bc *Blockchain) AddBlockToNewBlocksPool(msg string) {
+	bc.newBlocksPoolLock.Lock()
+	defer bc.newBlocksPoolLock.Unlock()
+	bc.newBlocksPool = append(bc.newBlocksPool, block.Block{Msg: msg, SubmitTimestamp: time.Now().Unix()})
+}
+
+// 获取链上的最后一个区块
+func (bc *Blockchain) GetLastBlock() block.Block {
+	bc.lock.Lock()
+	defer bc.lock.Unlock()
+
+	return bc.blocks[len(bc.blocks)-1]
+
+}
+
+// 返回最近一个需要挖的区块任务
+func (bc *Blockchain) GetLatestTask() (taskB block.Block) {
+	bc.newBlocksPoolLock.Lock()
+	defer bc.newBlocksPoolLock.Unlock()
+
+	if len(bc.newBlocksPool) > 0 {
+		return bc.newBlocksPool[0]
+	}
+	return
+}
+
+// 提交新的挖掘结果
+func (bc *Blockchain) SubmitNewBlock(b block.Block) {
+	if err := bc.NewBlock(b); err != nil {
+		log.Warn("收到新的区块，但是将其加入链中时报错", "err", err.Error())
+	}
 }
 
 // 获取当前的难度值
@@ -48,8 +88,9 @@ func NewBlockchain() *Blockchain {
 	}
 	genesis.Hash = genesis.HashForThisBlock()
 	return &Blockchain{
-		blocks:        []block.Block{genesis},
-		curDifficulty: 1,
+		blocks:                []block.Block{genesis},
+		curDifficulty:         1,
+		NewBlockCommittedChan: make(chan int),
 	}
 }
 
@@ -61,20 +102,24 @@ func (bc *Blockchain) GetBlocks() []block.Block {
 func (bc *Blockchain) NewBlock(b block.Block) error {
 	bc.lock.Lock()
 	defer bc.lock.Unlock()
+	bc.newBlocksPoolLock.Lock()
+	defer bc.newBlocksPoolLock.Unlock()
 
 	if err := bc.IsValidNewBlock(b); err != nil {
 		return err
 	}
 	bc.blocks = append(bc.blocks, b)
+	// 发出新区块确认的通知，TODO：这里用事件机制实现的话就不用一层一层传递了
+	bc.NewBlockCommittedChan <- b.Index
+	log.Info("确认新块", "b index", b.Index, "msg", b.Msg)
+	// 检查这个块是否来自当前的交易池，如果是则要将其从池子中移除
+	if len(bc.newBlocksPool) > 0 && bc.newBlocksPool[0].SubmitTimestamp == b.SubmitTimestamp {
+		log.Info("从交易池中移除新增的块", "block index", b.Index, "block msg", b.Msg)
+		bc.newBlocksPool = bc.newBlocksPool[1:]
+	} else {
+		log.Warn("新增的块不是来自于当前的交易池", "block msg", b.Msg)
+	}
 	return nil
-}
-
-// 返回最近的一个块
-func (bc *Blockchain) GetLatestTask() block.Block {
-	bc.lock.Lock()
-	defer bc.lock.Unlock()
-
-	return bc.blocks[len(bc.blocks)-1]
 }
 
 /*
@@ -96,6 +141,9 @@ func (bc *Blockchain) IsValidNewBlock(newB block.Block) error {
 		return bcerr.GetError(bcerr.NewBlockPrevHashWrongErr)
 	} else if newB.Difficulty != bc.curDifficulty {
 		return errors.New("新区块的难度值与当前难度不匹配")
+		// 检查挖出的随机数是否正确
+	} else if !hash_util.IsValidMineNonce(newB.Nonce, newB.Difficulty) {
+		return errors.New("随机数不符合难度要求")
 	} else if newB.HashForThisBlock() != newB.Hash {
 		return bcerr.GetError(bcerr.NewBlockHashWrongErr)
 	}

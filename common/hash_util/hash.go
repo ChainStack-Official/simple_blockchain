@@ -14,6 +14,11 @@ func HashForBlock(content []byte) string {
 	return hex.EncodeToString(hashed)
 }
 
+// 检查是否是合格的Nonce
+func IsValidMineNonce(nonce string, difficulty int) bool {
+	return IsValidMineHash(HashForBlock([]byte(nonce)), difficulty)
+}
+
 // 检查这个hash是否是合格的hash
 func IsValidMineHash(hash string, difficulty int) bool {
 	prefix := strings.Repeat("0", difficulty)

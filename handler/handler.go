@@ -8,6 +8,7 @@ import (
 	"simple_blockchain/ly"
 	"strconv"
 
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,14 +31,26 @@ func NewBlockHandler(c *gin.Context) {
 	util.RenderGinJsonResult(c, util.GetBaseResp(err, "新建成功"))
 }
 
+// 新增一个内容记录到区块链中
+func NewMsgHandler(c *gin.Context) {
+	msg := c.Query("content")
+	if msg == "" {
+		util.RenderGinJsonResult(c, util.GetBaseResp(errors.New("内容不能为空"), ""))
+		return
+	}
+	ly.Bc.AddBlockToNewBlocksPool(msg)
+	util.RenderGinJsonResult(c, util.GetBaseResp(nil, "发起成功"))
+}
+
 // 启动挖矿
 func StartMineHandler(c *gin.Context) {
 	mCountStr := c.Query("miner_count")
+	log.Debug("收到启动挖矿的请求", "count", mCountStr)
 	mCount, _ := strconv.Atoi(mCountStr)
 	if mCount == 0 {
 		mCount = 1
 	}
-	err := ly.StartMine(1)
+	err := ly.StartMine(mCount)
 	util.RenderGinJsonResult(c, util.GetBaseResp(err, "开始挖矿了"))
 }
 
