@@ -19,7 +19,7 @@ func main() {
 	// http服务
 	router := gin.Default()
 	// 提交一个msg（交易）
-	router.GET("/new_msg", handler.NewMsgHandler)
+	router.POST("/msg", handler.NewMsgHandler)
 	// 新建区块
 	router.POST("/block", handler.NewBlockHandler)
 	// 查看当前链上的所有块

@@ -48,7 +48,7 @@ func NewMiner(id int, tMaster TaskMaster) *Miner {
 		NewBlockFoundChan: make(chan int),
 		StopMineChan:      make(chan int),
 		tm:                tMaster,
-		StartTryAt:        uint64(1) << uint(10*id),
+		StartTryAt:        uint64(1) << uint(20*id),
 	}
 	m.refreshLatestTask()
 	return m
@@ -112,6 +112,8 @@ const tryCountEveryHeartBeat = 10 ^ 4
 func (m *Miner) mine() {
 	// 没有需要加入链中的区块
 	if m.curMiningBlock.SubmitTimestamp == 0 {
+		// 如果没有就要去刷新一下看下有没新的块
+		m.refreshLatestTask()
 		return
 	}
 	m.curMiningBlock.Index = m.lastBlock.Index + 1
@@ -127,7 +129,7 @@ func (m *Miner) mine() {
 		if hash_util.IsValidMineNonce(tmpNonce, m.curDifficulty) {
 			m.curMiningBlock.Nonce = tmpNonce
 			m.curMiningBlock.Hash = m.curMiningBlock.HashForThisBlock()
-			log.Info("挖到矿了", "miner id", m.Id, "b index", m.curMiningBlock.Index, "nonce", tmpNonce, "difficulty", m.curDifficulty)
+			log.Info("挖到矿了", "miner id", m.Id, "b index", m.curMiningBlock.Index, "nonce", tmpNonce, "nonce hash", hash_util.HashForBlock([]byte(tmpNonce)), "difficulty", m.curDifficulty, "msg", m.curMiningBlock.Msg)
 			// 提交该block
 			m.tm.SubmitNewBlock(m.curMiningBlock)
 			// 刷新任务，并结束本次计算

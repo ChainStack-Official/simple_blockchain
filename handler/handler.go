@@ -33,7 +33,12 @@ func NewBlockHandler(c *gin.Context) {
 
 // 新增一个内容记录到区块链中
 func NewMsgHandler(c *gin.Context) {
-	msg := c.Query("content")
+	var req map[string]string
+	if err := c.BindJSON(&req); err != nil {
+		util.RenderGinJsonResult(c, util.GetBaseResp(err, ""))
+		return
+	}
+	msg := req["content"]
 	if msg == "" {
 		util.RenderGinJsonResult(c, util.GetBaseResp(errors.New("内容不能为空"), ""))
 		return
