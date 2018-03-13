@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/ethereum/go-ethereum/log"
 	"os"
-	"github.com/gin-gonic/gin"
 	"simple_blockchain/handler"
+
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
@@ -19,7 +20,13 @@ func main() {
 	router := gin.Default()
 	// 新建区块
 	router.POST("/block", handler.NewBlockHandler)
+	// 查看当前链上的所有块
 	router.GET("/block", handler.GetBlocksHandler)
+	// 修改难度值
+	router.GET("/mine_conf", handler.ChangeDifficultyHandler)
+	// 启动挖矿
+	router.GET("/start_mine", handler.StartMineHandler)
+	// 停止挖矿
+	router.GET("/stop_mine", handler.StopMineHandler)
 	router.Run(":3000")
 }
-

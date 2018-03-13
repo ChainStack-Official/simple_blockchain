@@ -51,7 +51,10 @@ func GetError(args ...interface{}) (err error) {
 	default:
 		err = errors.New(allErr[errCode][0])
 	}
-	return fmt.Errorf("no err for lang: %v", lang)
+	if err == nil {
+		return fmt.Errorf("no err for lang: %v", lang)
+	}
+	return
 }
 
 // 所有配置了的错误
