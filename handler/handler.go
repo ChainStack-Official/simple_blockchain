@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TODO：handler可以考虑做成实例
+
 // 获取所有区块
 func GetBlocksHandler(c *gin.Context) {
 	util.RenderGinJsonResult(c, &req_model.GetBlocksResp{

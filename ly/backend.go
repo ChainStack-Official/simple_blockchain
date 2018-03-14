@@ -15,6 +15,7 @@ var Bc *blockchain.Blockchain
 var mineLock sync.Mutex
 var miners []*miner.Miner
 
+// TODO：service要做成实例，光是包无法满足某些功能
 func init() {
 	Bc = blockchain.NewBlockchain()
 	// 监听新区块创建的事件，TODO：换成事件通知后这里就不需要做中转了
