@@ -1,7 +1,7 @@
 package block
 
 import (
-	"simple_blockchain/common/hash_util"
+	"github.com/ChainStack-Official/simple_blockchain/common/hash_util"
 )
 
 // 块

@@ -2,10 +2,10 @@ package handler
 
 import (
 	"errors"
-	"simple_blockchain/common/util"
-	"simple_blockchain/core/block"
-	"simple_blockchain/handler/req_model"
-	"simple_blockchain/ly"
+	"github.com/ChainStack-Official/simple_blockchain/common/util"
+	"github.com/ChainStack-Official/simple_blockchain/core/block"
+	"github.com/ChainStack-Official/simple_blockchain/handler/req_model"
+	"github.com/ChainStack-Official/simple_blockchain/ly"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/log"
