@@ -1,8 +1,8 @@
 package req_model
 
 import (
-	"simple_blockchain/common/http_base"
-	"simple_blockchain/core/block"
+	"github.com/ChainStack-Official/simple_blockchain/common/http_base"
+	"github.com/ChainStack-Official/simple_blockchain/core/block"
 )
 
 type GetBlocksResp struct {

@@ -3,8 +3,8 @@ package ly
 import (
 	"errors"
 	"fmt"
-	"simple_blockchain/core/blockchain"
-	"simple_blockchain/core/miner"
+	"github.com/ChainStack-Official/simple_blockchain/core/blockchain"
+	"github.com/ChainStack-Official/simple_blockchain/core/miner"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/log"

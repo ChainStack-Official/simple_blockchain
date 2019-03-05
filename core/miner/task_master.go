@@ -1,6 +1,6 @@
 package miner
 
-import "simple_blockchain/core/block"
+import "github.com/ChainStack-Official/simple_blockchain/core/block"
 
 type TaskMaster interface {
 	// 获取最近的链上的块

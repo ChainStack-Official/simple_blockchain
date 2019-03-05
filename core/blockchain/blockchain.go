@@ -2,9 +2,9 @@ package blockchain
 
 import (
 	"errors"
-	"simple_blockchain/common/hash_util"
-	"simple_blockchain/core/bcerr"
-	"simple_blockchain/core/block"
+	"github.com/ChainStack-Official/simple_blockchain/common/hash_util"
+	"github.com/ChainStack-Official/simple_blockchain/core/bcerr"
+	"github.com/ChainStack-Official/simple_blockchain/core/block"
 	"sync"
 	"time"
 
