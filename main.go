@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"simple_blockchain/handler"
+	"github.com/ChainStack-Official/simple_blockchain/handler"
 
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/gin-gonic/gin"

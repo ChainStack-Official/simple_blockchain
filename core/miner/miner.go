@@ -2,8 +2,8 @@ package miner
 
 import (
 	"fmt"
-	"simple_blockchain/common/hash_util"
-	"simple_blockchain/core/block"
+	"github.com/ChainStack-Official/simple_blockchain/common/hash_util"
+	"github.com/ChainStack-Official/simple_blockchain/core/block"
 	"time"
 
 	"github.com/ethereum/go-ethereum/log"
